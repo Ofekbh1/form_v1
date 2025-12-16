@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>טופס חתימה</title>
+
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #1878FA;
+      --danger: #ef4444;
+      --ok: #16a34a;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+    }
+
+    .wrap {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 6px 0;
+    }
+    .sub {
+      margin: 0 0 16px 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      outline: none;
+      font-size: 15px;
+      background: #fff;
+    }
+
+    input:focus {
+      border-color: rgba(24, 120, 250, 0.5);
+      box-shadow: 0 0 0 4px rgba(24, 120, 250, 0.12);
+    }
+
+    .sigBox {
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fafafa;
+    }
+
+    .sigTop {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .sigHint {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    canvas {
+      width: 100%;
+      height: 180px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      touch-action: none;
+      display: block;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 15px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .btnPrimary {
+      background: var(--primary);
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .btnGhost {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      display: none;
+    }
+
+    .status.ok { border-color: rgba(22,163,74,.3); background: rgba(22,163,74,.08); display: block; }
+    .status.err { border-color: rgba(239,68,68,.3); background: rgba(239,68,68,.08); display: block; }
+
+    .foot {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>טופס פרטים + חתימה</h1>
+      <p class="sub">נא למלא את הפרטים ולחתום. לאחר שליחה, המידע יועבר אוטומטית למערכת.</p>
+
+      <form id="form" class="grid" autocomplete="off">
+        <div>
+          <label for="firstName">שם פרטי</label>
+          <input id="firstName" name="firstName" required placeholder="לדוגמה: אופק" />
+        </div>
+
+        <div>
+          <label for="lastName">שם משפחה</label>
+          <input id="lastName" name="lastName" required placeholder="לדוגמה: בן חמו" />
+        </div>
+
+        <div>
+          <label for="city">מקום מגורים</label>
+          <input id="city" name="city" required placeholder="לדוגמה: תל אביב" />
+        </div>
+
+        <div>
+          <label for="idNumber">מספר תעודת זהות</label>
+          <input
+            id="idNumber"
+            name="idNumber"
+            inputmode="numeric"
+            pattern="^[0-9]{5,10}$"
+            required
+            placeholder="לדוגמה: 123456789"
+          />
+        </div>
+
+        <div class="sigBox">
+          <div class="sigTop">
+            <p class="sigHint">חתימה (באצבע/עכבר):</p>
+            <button type="button" class="btnGhost" id="clearBtn" style="width:auto;">נקה חתימה</button>
+          </div>
+
+          <canvas id="sig"></canvas>
+          <div class="actions">
+            <button type="submit" class="btnPrimary" id="submitBtn">שלח טופס</button>
+          </div>
+
+          <div id="status" class="status"></div>
+        </div>
+
+        <div class="foot">
+          אם יש בעיה בשליחה, נסה לרענן את הדף ולחתום מחדש.
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // --------- Canvas Signature (pointer events) ---------
+    const canvas = document.getElementById("sig");
+    const ctx = canvas.getContext("2d");
+    const statusEl = document.getElementById("status");
+    const clearBtn = document.getElementById("clearBtn");
+    const submitBtn = document.getElementById("submitBtn");
+
+    let drawing = false;
+    let lastX = 0, lastY = 0;
+    let hasInk = false;
+
+    function setStatus(type, text) {
+      statusEl.className = "status " + (type === "ok" ? "ok" : "err");
+      statusEl.textContent = text;
+    }
+
+    function clearStatus() {
+      statusEl.className = "status";
+      statusEl.textContent = "";
+      statusEl.style.display = "none";
+    }
+
+    function resizeCanvas() {
+      // Keep it sharp on high DPI
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+      // drawing style
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#0f172a";
+    }
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+
+    function startDraw(e) {
+      drawing = true;
+      const p = getPos(e);
+      lastX = p.x;
+      lastY = p.y;
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+    }
+
+    function moveDraw(e) {
+      if (!drawing) return;
+      const p = getPos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      lastX = p.x;
+      lastY = p.y;
+      hasInk = true;
+    }
+
+    function endDraw() {
+      drawing = false;
+    }
+
+    // Prevent scrolling while signing on mobile
+    canvas.addEventListener("pointerdown", (e) => { clearStatus(); startDraw(e); });
+    canvas.addEventListener("pointermove", moveDraw);
+    canvas.addEventListener("pointerup", endDraw);
+    canvas.addEventListener("pointerleave", endDraw);
+    canvas.addEventListener("pointercancel", endDraw);
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    clearBtn.addEventListener("click", () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasInk = false;
+      clearStatus();
+    });
+
+    // --------- Submit to n8n workflow ----------
+    const ENDPOINT = "https://obotdev.biz/workflow/2aEuiU4OZLVy2Wzo";
+
+    document.getElementById("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearStatus();
+
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName  = document.getElementById("lastName").value.trim();
+      const city      = document.getElementById("city").value.trim();
+      const idNumber  = document.getElementById("idNumber").value.trim();
+
+      if (!hasInk) {
+        setStatus("err", "חסרה חתימה. נא לחתום לפני שליחה.");
+        return;
+      }
+
+      // Signature as PNG base64
+      const signatureDataUrl = canvas.toDataURL("image/png");
+
+      const payload = {
+        firstName,
+        lastName,
+        city,
+        idNumber,
+        signature: signatureDataUrl,
+        createdAt: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "שולח...";
+
+      try {
+        const res = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        // אם ה-endpoint מחזיר JSON – נקרא אותו, אחרת נסתפק בטקסט
+        const contentType = res.headers.get("content-type") || "";
+        const data = contentType.includes("application/json") ? await res.json() : await res.text();
+
+        if (!res.ok) {
+          setStatus("err", "שגיאה בשליחה. נסה שוב או בדוק את ה-Workflow ב-n8n.");
+          console.error("Server response:", data);
+          return;
+        }
+
+        setStatus("ok", "נשלח בהצלחה ✅ אפשר לסגור את הדף.");
+      } catch (err) {
+        console.error(err);
+        setStatus("err", "שגיאת רשת/חסימת CORS. בדוק שה-Workflow מאושר לקבל POST מהדפדפן.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "שלח טופס";
+      }
+    });
+  </script>
+</body>
+</html>
