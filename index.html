@@ -108,6 +108,7 @@
     <form id="form" class="grid" autocomplete="off">
       <input id="firstName" placeholder="שם פרטי" required />
       <input id="lastName" placeholder="שם משפחה" required />
+      <input id="email" type="email" placeholder="אימייל" required />
       <input id="city" placeholder="עיר" required />
       <input id="idNumber" placeholder="תעודת זהות" required />
 
@@ -177,6 +178,7 @@
     const payload = {
       firstName: firstName.value,
       lastName: lastName.value,
+      email: email.value,
       city: city.value,
       idNumber: idNumber.value,
       signature: canvas.toDataURL("image/png"),
