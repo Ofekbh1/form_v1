@@ -15,9 +15,8 @@
       --muted: #64748b;
       --border: #e2e8f0;
       --primary: #1878FA;
-      --danger: #ef4444;
       --ok: #16a34a;
-      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --danger: #ef4444;
       --radius: 16px;
     }
 
@@ -30,47 +29,20 @@
       padding: 20px;
     }
 
-    .wrap {
-      max-width: 560px;
-      margin: 0 auto;
-    }
-
+    .wrap { max-width: 560px; margin: 0 auto; }
     .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
       padding: 18px;
     }
 
-    h1 {
-      font-size: 22px;
-      margin: 0 0 6px 0;
-    }
+    h1 { font-size: 22px; margin: 0 0 6px; }
+    h2 { font-size: 16px; margin-top: 24px; }
+    .sub { color: var(--muted); font-size: 14px; }
 
-    h2 {
-      font-size: 16px;
-      margin-top: 24px;
-    }
-
-    .sub {
-      margin: 0 0 16px 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.4;
-    }
-
-    .grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    label {
-      display: block;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
+    .grid { display: grid; gap: 12px; }
+    label { font-size: 13px; color: var(--muted); }
 
     input {
       width: 100%;
@@ -97,135 +69,134 @@
     }
 
     button {
-      border-radius: 12px;
+      margin-top: 8px;
       padding: 12px;
+      border-radius: 12px;
       font-size: 15px;
       cursor: pointer;
       width: 100%;
       border: none;
     }
 
-    .btnPrimary {
-      background: var(--primary);
-      color: #fff;
-      font-weight: bold;
-    }
-
-    .btnGhost {
-      background: #fff;
-      border: 1px solid var(--border);
-    }
+    .btnPrimary { background: var(--primary); color: #fff; font-weight: bold; }
+    .btnGhost { background: #fff; border: 1px solid var(--border); }
 
     .status {
       margin-top: 12px;
-      font-size: 14px;
       padding: 10px;
       border-radius: 12px;
+      font-size: 14px;
       display: none;
     }
 
     .status.ok { display:block; background:#e6f7ec; color:#065f46; }
     .status.err { display:block; background:#fee2e2; color:#7f1d1d; }
 
-    footer {
-      margin-top: 24px;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
+    footer { margin-top: 24px; font-size: 12px; color: var(--muted); }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="card">
+<div class="wrap">
+  <div class="card">
 
-      <!-- זהות עסקית -->
-      <h1>Obot – שירותים דיגיטליים ואוטומציה</h1>
-      <p class="sub">
-        Obot מספקת פתרונות שירות לקוחות ואוטומציה דיגיטלית לעסקים קטנים,
-        כולל טפסים מקוונים, חתימה דיגיטלית והעברת מידע מאובטחת.
-      </p>
+    <h1>Obot – שירותים דיגיטליים ואוטומציה</h1>
+    <p class="sub">
+      טופס זה מאפשר שליחת פרטים וחתימה דיגיטלית לצורך קבלת שירות.
+    </p>
 
-      <!-- הטופס -->
-      <form id="form" class="grid" autocomplete="off">
-        <div>
-          <label>שם פרטי</label>
-          <input id="firstName" required />
-        </div>
+    <form id="form" class="grid" autocomplete="off">
+      <input id="firstName" placeholder="שם פרטי" required />
+      <input id="lastName" placeholder="שם משפחה" required />
+      <input id="city" placeholder="עיר" required />
+      <input id="idNumber" placeholder="תעודת זהות" required />
 
-        <div>
-          <label>שם משפחה</label>
-          <input id="lastName" required />
-        </div>
+      <div class="sigBox">
+        <label>חתימה דיגיטלית</label>
+        <canvas id="sig"></canvas>
+        <button type="button" class="btnGhost" id="clearBtn">נקה חתימה</button>
+        <button type="submit" class="btnPrimary" id="submitBtn">שלח טופס</button>
+        <div id="status" class="status"></div>
+      </div>
+    </form>
 
-        <div>
-          <label>עיר</label>
-          <input id="city" required />
-        </div>
+    <footer>
+      © 2025 Obot · מידע נשלח רק לאחר הסכמת המשתמש
+    </footer>
 
-        <div>
-          <label>תעודת זהות</label>
-          <input id="idNumber" required />
-        </div>
-
-        <div class="sigBox">
-          <label>חתימה דיגיטלית</label>
-          <canvas id="sig"></canvas>
-          <button type="button" class="btnGhost" id="clearBtn">נקה חתימה</button>
-          <button type="submit" class="btnPrimary" id="submitBtn">שלח טופס</button>
-          <div id="status" class="status"></div>
-        </div>
-      </form>
-
-      <!-- פרטי קשר -->
-      <h2>פרטי קשר</h2>
-      <p>
-        אימייל: ofek53330@gmail.com<br />
-        טלפון: ‎+972-52-643-8433
-      </p>
-
-      <!-- Privacy -->
-      <h2>מדיניות פרטיות</h2>
-      <p>
-        אנו אוספים מידע אך ורק לצורך מתן שירות ללקוח.
-        הודעות נשלחות רק לאחר פנייה יזומה של המשתמש או מילוי טופס זה.
-        לא נשלחות הודעות פרסומיות ללא הסכמה.
-      </p>
-
-      <footer>
-        © 2025 Obot – All rights reserved
-      </footer>
-
-    </div>
   </div>
+</div>
 
-  <!-- הלוגיקה שלך נשארת -->
-  <script>
-    const canvas = document.getElementById("sig");
-    const ctx = canvas.getContext("2d");
-    let drawing=false, hasInk=false;
+<script>
+  const WEBHOOK_URL = "https://obotdev.biz/webhook/signature-form";
 
-    function resize(){
-      const r=window.devicePixelRatio||1;
-      canvas.width=canvas.offsetWidth*r;
-      canvas.height=180*r;
-      ctx.setTransform(r,0,0,r,0,0);
-      ctx.lineWidth=2;
+  const canvas = document.getElementById("sig");
+  const ctx = canvas.getContext("2d");
+  const status = document.getElementById("status");
+  let drawing = false, hasInk = false;
+
+  function resize() {
+    const r = window.devicePixelRatio || 1;
+    canvas.width = canvas.offsetWidth * r;
+    canvas.height = 180 * r;
+    ctx.setTransform(r, 0, 0, r, 0, 0);
+    ctx.lineWidth = 2;
+  }
+  resize(); window.onresize = resize;
+
+  canvas.onpointerdown = e => {
+    drawing = true;
+    ctx.beginPath();
+    ctx.moveTo(e.offsetX, e.offsetY);
+  };
+  canvas.onpointermove = e => {
+    if (!drawing) return;
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+    hasInk = true;
+  };
+  canvas.onpointerup = () => drawing = false;
+
+  clearBtn.onclick = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasInk = false;
+  };
+
+  form.onsubmit = async e => {
+    e.preventDefault();
+
+    if (!hasInk) {
+      status.textContent = "נא לחתום לפני השליחה";
+      status.className = "status err";
+      return;
     }
-    resize(); window.onresize=resize;
 
-    canvas.onpointerdown=e=>{drawing=true;ctx.beginPath();ctx.moveTo(e.offsetX,e.offsetY);}
-    canvas.onpointermove=e=>{if(!drawing)return;ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke();hasInk=true;}
-    canvas.onpointerup=()=>drawing=false;
+    status.textContent = "שולח…";
+    status.className = "status ok";
 
-    clearBtn.onclick=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);hasInk=false;}
+    const payload = {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      city: city.value,
+      idNumber: idNumber.value,
+      signature: canvas.toDataURL("image/png"),
+      submittedAt: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    };
 
-    form.onsubmit=async e=>{
-      e.preventDefault();
-      if(!hasInk){status.textContent="נא לחתום";status.className="status err";return;}
-      status.textContent="נשלח";status.className="status ok";
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      status.textContent = "הטופס נשלח בהצלחה ✅";
+    } catch {
+      status.textContent = "שגיאה בשליחה, נסה שוב";
+      status.className = "status err";
     }
-  </script>
+  };
+</script>
 </body>
 </html>
