@@ -15,7 +15,6 @@
       --muted: #64748b;
       --border: #e2e8f0;
       --primary: #1878FA;
-      --ok: #16a34a;
       --danger: #ef4444;
       --radius: 16px;
     }
@@ -38,11 +37,10 @@
     }
 
     h1 { font-size: 22px; margin: 0 0 6px; }
-    h2 { font-size: 16px; margin-top: 24px; }
+    h2 { font-size: 16px; margin-top: 20px; }
     .sub { color: var(--muted); font-size: 14px; }
 
     .grid { display: grid; gap: 12px; }
-    label { font-size: 13px; color: var(--muted); }
 
     input {
       width: 100%;
@@ -50,6 +48,10 @@
       border-radius: 12px;
       border: 1px solid var(--border);
       font-size: 15px;
+    }
+
+    input[readonly] {
+      background:#f8fafc;
     }
 
     .sigBox {
@@ -80,6 +82,14 @@
 
     .btnPrimary { background: var(--primary); color: #fff; font-weight: bold; }
     .btnGhost { background: #fff; border: 1px solid var(--border); }
+    .btnDanger { background: #fee2e2; color: #7f1d1d; }
+
+    .imgBlock {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fafafa;
+    }
 
     .status {
       margin-top: 12px;
@@ -101,104 +111,169 @@
   <div class="card">
 
     <h1>Obot – שירותים דיגיטליים ואוטומציה</h1>
-    <p class="sub">
-      טופס זה מאפשר שליחת פרטים וחתימה דיגיטלית לצורך קבלת שירות.
-    </p>
+    <p class="sub">טופס זה מאפשר שליחת פרטים וחתימה דיגיטלית לצורך קבלת שירות.</p>
 
     <form id="form" class="grid" autocomplete="off">
+
+      <!-- URL DATA -->
+      <h2>פרטי שיחה</h2>
+      <input id="waid" readonly />
+      <input id="toEmail" type="email" readonly />
+
+      <!-- USER DATA -->
+      <h2>פרטים אישיים</h2>
       <input id="firstName" placeholder="שם פרטי" required />
       <input id="lastName" placeholder="שם משפחה" required />
       <input id="email" type="email" placeholder="אימייל" required />
       <input id="city" placeholder="עיר" required />
       <input id="idNumber" placeholder="תעודת זהות" required />
 
+      <!-- 🔥 NEW FEATURE: IMAGES -->
+      <h2>תמונות</h2>
+      <div id="imagesContainer" class="grid"></div>
+
+      <button type="button" class="btnGhost" onclick="addImageField()">
+        ➕ הוסף תמונה
+      </button>
+
+      <!-- SIGNATURE -->
       <div class="sigBox">
         <label>חתימה דיגיטלית</label>
         <canvas id="sig"></canvas>
         <button type="button" class="btnGhost" id="clearBtn">נקה חתימה</button>
-        <button type="submit" class="btnPrimary" id="submitBtn">שלח טופס</button>
+        <button type="submit" class="btnPrimary">שלח טופס</button>
         <div id="status" class="status"></div>
       </div>
+
     </form>
 
-    <footer>
-      © 2025 Obot · מידע נשלח רק לאחר הסכמת המשתמש
-    </footer>
-
+    <footer>© 2026 Obot</footer>
   </div>
 </div>
 
 <script>
-  const WEBHOOK_URL = "https://obotdev.biz/webhook/signature-form";
+const WEBHOOK_URL = "https://obotdev.biz/webhook/signature-form";
 
-  const canvas = document.getElementById("sig");
-  const ctx = canvas.getContext("2d");
-  const status = document.getElementById("status");
-  let drawing = false, hasInk = false;
+/* ---------------- URL PARAMS ---------------- */
+const params = new URLSearchParams(window.location.search);
+const waidVal = decodeURIComponent(params.get("waid") || "");
+const toEmailVal = decodeURIComponent(params.get("toEmail") || "");
 
-  function resize() {
-    const r = window.devicePixelRatio || 1;
-    canvas.width = canvas.offsetWidth * r;
-    canvas.height = 180 * r;
-    ctx.setTransform(r, 0, 0, r, 0, 0);
-    ctx.lineWidth = 2;
+waid.value = waidVal;
+toEmail.value = toEmailVal;
+
+/* ---------------- SIGNATURE ---------------- */
+const canvas = document.getElementById("sig");
+const ctx = canvas.getContext("2d");
+let drawing = false, hasInk = false;
+
+function resize() {
+  const r = window.devicePixelRatio || 1;
+  canvas.width = canvas.offsetWidth * r;
+  canvas.height = 180 * r;
+  ctx.setTransform(r, 0, 0, r, 0, 0);
+  ctx.lineWidth = 2;
+}
+resize();
+window.onresize = resize;
+
+canvas.onpointerdown = e => {
+  drawing = true;
+  ctx.beginPath();
+  ctx.moveTo(e.offsetX, e.offsetY);
+};
+canvas.onpointermove = e => {
+  if (!drawing) return;
+  ctx.lineTo(e.offsetX, e.offsetY);
+  ctx.stroke();
+  hasInk = true;
+};
+canvas.onpointerup = () => drawing = false;
+
+clearBtn.onclick = () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  hasInk = false;
+};
+
+/* ---------------- IMAGES (NEW) ---------------- */
+function addImageField() {
+  const div = document.createElement("div");
+  div.className = "imgBlock grid";
+  div.innerHTML = `
+    <input type="file" accept="image/*" />
+    <input type="text" placeholder="תיאור התמונה" />
+    <button type="button" class="btnDanger">הסר תמונה</button>
+  `;
+  div.querySelector("button").onclick = () => div.remove();
+  imagesContainer.appendChild(div);
+}
+
+function fileToBase64(file) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.readAsDataURL(file);
+  });
+}
+
+/* ---------------- SUBMIT ---------------- */
+form.onsubmit = async e => {
+  e.preventDefault();
+
+  if (!hasInk) {
+    status.textContent = "נא לחתום לפני השליחה";
+    status.className = "status err";
+    return;
   }
-  resize(); window.onresize = resize;
 
-  canvas.onpointerdown = e => {
-    drawing = true;
-    ctx.beginPath();
-    ctx.moveTo(e.offsetX, e.offsetY);
+  status.textContent = "שולח…";
+  status.className = "status ok";
+
+  const images = [];
+  for (const block of document.querySelectorAll(".imgBlock")) {
+    const file = block.querySelector('input[type="file"]').files[0];
+    const desc = block.querySelector('input[type="text"]').value;
+    if (!file) continue;
+
+    images.push({
+      filename: file.name,
+      description: desc,
+      data: await fileToBase64(file)
+    });
+  }
+
+  const payload = {
+    waid: waidVal,
+    toEmail: toEmailVal,
+
+    firstName: firstName.value,
+    lastName: lastName.value,
+    email: email.value,
+    city: city.value,
+    idNumber: idNumber.value,
+
+    images, // ✅ NEW FIELD
+    signature: canvas.toDataURL("image/png"),
+
+    submittedAt: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    pageUrl: location.href
   };
-  canvas.onpointermove = e => {
-    if (!drawing) return;
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.stroke();
-    hasInk = true;
-  };
-  canvas.onpointerup = () => drawing = false;
 
-  clearBtn.onclick = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    hasInk = false;
-  };
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-  form.onsubmit = async e => {
-    e.preventDefault();
-
-    if (!hasInk) {
-      status.textContent = "נא לחתום לפני השליחה";
-      status.className = "status err";
-      return;
-    }
-
-    status.textContent = "שולח…";
+    status.textContent = "הטופס נשלח בהצלחה ✅";
     status.className = "status ok";
-
-    const payload = {
-      firstName: firstName.value,
-      lastName: lastName.value,
-      email: email.value,
-      city: city.value,
-      idNumber: idNumber.value,
-      signature: canvas.toDataURL("image/png"),
-      submittedAt: new Date().toISOString(),
-      userAgent: navigator.userAgent
-    };
-
-    try {
-      await fetch(WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      status.textContent = "הטופס נשלח בהצלחה ✅";
-    } catch {
-      status.textContent = "שגיאה בשליחה, נסה שוב";
-      status.className = "status err";
-    }
-  };
+  } catch {
+    status.textContent = "שגיאה בשליחה";
+    status.className = "status err";
+  }
+};
 </script>
 </body>
 </html>
